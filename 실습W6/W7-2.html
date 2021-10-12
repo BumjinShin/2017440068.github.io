@@ -20,9 +20,7 @@
     }
     document.write("<hr>");
     document.write("역순으로 재정렬된 배열<br>");
-    n.sort(function(a,b){
-        return b-a;
-    });
+    n.reverse();
     for(i=0; i<5; i++){
         document.write(n[i]+" ");
     }
