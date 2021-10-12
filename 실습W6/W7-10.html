@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>book 객체 배열 만들기</title>
+</head>
+<body>
+<h3>book 객체 배열 만들기</h3>
+<hr>
+<script>
+    var bookArr = new Array();
+    for(i=0; i<5; i++){
+        var input = prompt("콤마(,)로 분리하면서 책제목 저자 가격 순으로 입력");
+        var arr = input.split(",");
+        var book = new Object();
+        book.title = arr[0];
+        book.author = arr[1];
+        book.price = arr[2];
+        bookArr[i] = book;
+    }
+    for(i=0; i<bookArr.length; i++){
+        document.write(bookArr[i].title+", "+bookArr[i].author+", "+bookArr[i].price+"<br>");
+    }
+    document.write("<hr>")
+    var mvb = bookArr[0];
+    for(i=0; i<bookArr.length; i++){
+        if(bookArr[i].price > mvb.price)
+            mvb = bookArr[i];
+    }
+    document.write("가장 가격이 비싼 책은 "+mvb.title);
+</script>
+</body>
+</html>
