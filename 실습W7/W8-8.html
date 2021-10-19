@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>transform:rotate()</title>
+</head>
+<body>
+<script>
+    var n = 2;
+    function transform(obj) {
+        obj.style.transform="scaleX("+n+")";
+        n++;
+    }
+</script>
+<h3>클릭하면 2,3,4 배 옆으로 늘어납니다.</h3>
+<hr>
+<img id = "a" src="sb.png" width = "500px" alt =animation onclick="transform(this)">
+</body>
+</html>
