@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    
+    
+</head>
+<body>
+    <script src="https://code.jquery.com/jquery-3.1.1.js"></script>
+    <script>   
+    
+    var xhr = new XMLHttpRequest();
+    var url1 = 'http://apis.data.go.kr/1741000/DisasterMsg3/getDisasterMsg1List'; /*URL*/
+    var queryParams = '?' + encodeURIComponent('serviceKey') + '='+'MFhl5md99ux79WOoJFJx3qbzWcDKnCwd9WQsym5B0wytpagXud7PiL%2BBUJ29RjmJZClIShs0P2aNQan9EBVtnA%3D%3D'; /*Service Key*/
+    queryParams += '&' + encodeURIComponent('pageNo') + '=' + encodeURIComponent('1'); /**/
+    queryParams += '&' + encodeURIComponent('numOfRows') + '=' + encodeURIComponent('10'); /**/
+    queryParams += '&' + encodeURIComponent('type') + '=' + encodeURIComponent('xml'); /**/
+
+    $(document).ready(function () {
+        $.ajax({
+            url: url1+queryParams,
+            type: 'GET', 
+            dataType: 'xml',
+            success: function (response) { 
+                xmlParsing(response);
+            }
+        });
+    
+        function xmlParsing(data) {
+            var infoList = ``;
+            $(data).find('row').each(function(index, item){
+                infoList += `
+                    <tr>
+                        <td>${$(this).find('create_date').text()}</td>
+                        <td>${$(this).find('location_id').text()}</td>
+                        <td>${$(this).find('location_name').text()}</td>
+                        <td>${$(this).find('md101_sn').text()}</td>
+                        <td>${$(this).find('msg').text()}</td>
+                        <td>${$(this).find('send_platform').text()}</td>
+                    </tr>
+                `;
+                $('#info').empty().append(infoList);
+                $('tr:first').css('background', 'darkgray').css('color', 'white')
+            });
+        }
+    });
+    </script>
+<h3>재난문자 발령현황</h3>
+	<button>재난문자 발령현황</button>
+	<table>
+        <tr>
+            <th>생성일시</th>
+            <th>수신지역 코드</th>
+            <th>수신지역 이름</th>
+            <th>일련번호</th>
+            <th>내용</th>
+            <th>발신처</th>
+        </tr>
+        <tbody id="info"></tbody>
+	</table>
+</body>
+</html>
