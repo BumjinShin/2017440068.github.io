@@ -23,13 +23,13 @@
             type: 'GET', 
             dataType: 'xml',
             success: function (response) { 
-                xmlParsing(response);
+                myfunction(response);
             }
         });
     
-        function xmlParsing(data) {
+        function myfunction(data) {
             var infoList = ``;
-            $(data).find('row').each(function(index, item){
+            $(data).find('row').each(function(){
                 infoList += `
                     <tr>
                         <td>${$(this).find('create_date').text()}</td>
