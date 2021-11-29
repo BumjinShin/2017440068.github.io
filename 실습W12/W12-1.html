@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+</head>
+<body>
+    <script src="https://code.jquery.com/jquery-3.1.1.js"></script>
+    <script>   
+    function abc() {
+        $.ajax({
+            url: 'https://api.odcloud.kr/api/15066113/v1/uddi:b72a7ab6-9c27-44ad-937e-93188c67c53d?page=1&perPage=260&serviceKey=MFhl5md99ux79WOoJFJx3qbzWcDKnCwd9WQsym5B0wytpagXud7PiL%2BBUJ29RjmJZClIShs0P2aNQan9EBVtnA%3D%3D',
+            type: 'GET', 
+            success: function (response) { 
+                $("#a").empty(); 
+                
+                let ab = response["data"];
+                for(let i=0; i<ab.length; i++){
+                    let location_id=ab[i]["LOCATION_ID"];
+                    let name=ab[i]["발송지역(시도)"];
+                    let name2=ab[i]["발송지역(시군구)"];
+                    let b = `<li>${location_id}: ${name} ${name2}</li>`;
+                    $("#a").append(b);
+                }
+                console.log(response)
+            }
+
+        })
+    }
+    </script>
+<h3>지역번호와 지역명</h3>
+<div> 
+    <button onclick="abc()">업데이트</button> 
+    <ul id="a"> 
+        <li>바뀔예정</li>
+    </ul>
+</div>
+
+
+</body>
+</html>
