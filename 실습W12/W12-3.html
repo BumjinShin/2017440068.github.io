@@ -124,20 +124,15 @@ function loadDoc(region){
     xhr.send('');
 }
 function myFunction(xml) {
-    var i;
     var xmlDoc = xml.responseXML;
     var table="<tr><th>날짜</th><th>지역</th><th>내용</th></tr>";
-    let date = xmlDoc.getElementsByTagName("create_date");
+    var date = xmlDoc.getElementsByTagName("create_date");
     var loc = xmlDoc.getElementsByTagName("location_name");
-    let msg = xmlDoc.getElementsByTagName("msg");
-    for (i = 0; i <loc.length; i++) { 
-        table += "<tr><td>" +
-        date[i].innerHTML+
-        "</td><td>"+
-        loc[i].innerHTML+
-        "</td><td>" +
-        msg[i].innerHTML+
-        "</td></tr>";
+    var msg = xmlDoc.getElementsByTagName("msg");
+    for (var i = 0; i <loc.length; i++) { 
+        table += "<tr><td>"+date[i].innerHTML+"</td><td>"+
+        loc[i].innerHTML+"</td><td>"+
+        msg[i].innerHTML+"</td></tr>";
     }
     document.getElementById("kpas").innerHTML = table;
 }
