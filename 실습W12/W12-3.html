@@ -14,18 +14,8 @@
 
 </head>
 <body>
-    <style>
-        table,th,td {
-            border : 1px solid black;
-            border-collapse: collapse;
-        }
-        th,td {
-            padding: 5px;
-            font-size: 15px;
-        }
-    </style>
     <div id="map" style="width:100%;height:400px;"></div>
-    <table id="disaster"></table>
+    <table id="kpas"></table>
     <script>
     var HOME_PATH = "https://navermaps.github.io/maps.js/docs"
         urlPrefix = HOME_PATH +'/data/region',
@@ -38,7 +28,7 @@
         mapTypeId: 'normal',
         center: new naver.maps.LatLng(36.4203004, 128.317960)
     });
-    //일회성 이벤트 정의(GeoJSON)
+    
     naver.maps.Event.once(map, 'init_stylemap', function () {
         for (var i = 1; i < 18; i++) {
             var keyword = i +'';
@@ -65,7 +55,6 @@
     });
     
     var tooltip = $('<div style="position:absolute;z-index:1000;padding:5px 10px;background-color:#fff;border:solid 2px #000;font-size:14px;pointer-events:none;display:none;"></div>');
-    
     tooltip.appendTo(map.getPanes().floatPane);
     
     function startDataLayer() {
@@ -77,25 +66,12 @@
                 strokeWeight: 2,
                 strokeOpacity: 0.4
             };
-    
-            if (feature.getProperty('focus')) {
-                styleOptions.fillOpacity = 0.6;
-                styleOptions.fillColor = '#0f0';
-                styleOptions.strokeColor = '#0f0';
-                styleOptions.strokeWeight = 4;
-                styleOptions.strokeOpacity = 1;
-            }
-    
+
             return styleOptions;
         });
-        //map에 GeoJSON데이터 등록
+        
         regionGeoJson.forEach(function(geojson) {
             map.data.addGeoJson(geojson);
-        });
-        //여러가지 eventListener등록
-        map.data.addListener('click', function(e) {
-            var feature = e.feature;
-            loadDoc(feature.getProperty('area1'));
         });
     
         map.data.addListener('mouseover', function(e) {
@@ -118,6 +94,11 @@
         map.data.addListener('mouseout', function(e) {
             tooltip.hide().empty();
             map.data.revertStyle();
+        });
+
+        map.data.addListener('click', function(e) {
+            var feature = e.feature;
+            loadDoc(feature.getProperty('area1'));
         });
     }
     </script>
@@ -158,7 +139,7 @@ function myFunction(xml) {
         msg[i].innerHTML+
         "</td></tr>";
     }
-    document.getElementById("disaster").innerHTML = table;
+    document.getElementById("kpas").innerHTML = table;
 }
 
 </script>
