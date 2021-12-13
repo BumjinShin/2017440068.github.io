@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>KPASS</title>
+
+    <!-- jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> 
+    
+    <!-- naver map -->
+    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=it5t1pv209"></script>
+    
+</head>
+
+<style>
+    table,th,td {
+        border : 1px solid black;
+        border-collapse: collapse;
+    }
+    th,td {
+        padding: 5px;
+        font-size: 15px;
+
+    }
+</style>
+
+<body>
+    <div id="map" style="width:100%;height:400px;"></div>
+    
+    <div>
+        <span>
+            <li>
+            <label for="area1">대상지역</label>
+            <select id="area1" onchange="area(this)">
+                <option value="x">시도선택</option>
+                <option value="서울특별시">서울특별시 </option>
+                <option value="부산광역시">부산광역시 </option>
+                <option value="대구광역시">대구광역시 </option>
+                <option value="인천광역시">인천광역시 </option>
+                <option value="광주광역시">광주광역시 </option>
+                <option value="대전광역시">대전광역시 </option>
+                <option value="울산광역시">울산광역시 </option>
+                <option value="세종특별자치시">세종특별자치시</option>
+                <option value="경기도">경기도 </option>
+                <option value="강원도">강원도 </option>
+                <option value="충청북도">충청북도 </option>
+                <option value="충청남도">충청남도 </option>
+                <option value="전라북도">전라북도 </option>
+                <option value="전라남도">전라남도 </option>
+                <option value="경상북도">경상북도 </option>
+                <option value="경상남도">경상남도 </option>
+                <option value="제주특별자치도">제주특별자치도 </option>
+                <option value="">전국</option>
+            </select>
+            <select id="area2">
+                <option value>시군구선택</option>
+            </select>
+        </span>
+        <button onclick="loadDoc(1)">검색</button>
+    </div>
+    <table id="kpas"></table>
+    <div>
+        <button id="before" onclick="before()"><</button>
+        <span id="pageNum"></span>
+        <button id="after" onclick="after()">></button>
+        <input id="search" type="text" size="1">
+        <button onclick="find()">검색</button>
+    </div>
+    
+
+    <script>
+    var HOME_PATH = "https://navermaps.github.io/maps.js/docs"
+        urlPrefix = HOME_PATH +'/data/region',
+        urlSuffix = '.json',
+        regionGeoJson = [],
+        loadCount = 0;
+    
+    var map = new naver.maps.Map(document.getElementById('map'), {
+        zoom: 7,
+        mapTypeId: 'normal',
+        center: new naver.maps.LatLng(36.4203004, 128.317960)
+    });
+    
+    naver.maps.Event.once(map, 'init_stylemap', function () {
+        for (var i = 1; i < 18; i++) {
+            var keyword = i +'';
+    
+            if (keyword.length === 1) {
+                keyword = '0'+ keyword;
+            }
+    
+            $.ajax({
+                url: urlPrefix + keyword + urlSuffix,
+                success: function(idx) {
+                    return function(geojson) {
+                        regionGeoJson[idx] = geojson;
+    
+                        loadCount++;
+    
+                        if (loadCount === 17) {
+                            startDataLayer();
+                        }
+                    }
+                }(i - 1)
+            });
+        }
+    });
+    
+    var tooltip = $('<div style="position:absolute;z-index:1000;padding:5px 10px;background-color:#fff;border:solid 2px #000;font-size:14px;pointer-events:none;display:none;"></div>');
+    tooltip.appendTo(map.getPanes().floatPane);
+    
+    function startDataLayer() {
+        map.data.setStyle(function(feature) {
+            var styleOptions = {
+                fillColor: '#ff0000',
+                fillOpacity: 0.0001,
+                strokeColor: '#ff0000',
+                strokeWeight: 2,
+                strokeOpacity: 0.4
+            };
+
+            return styleOptions;
+        });
+        
+        regionGeoJson.forEach(function(geojson) {
+            map.data.addGeoJson(geojson);
+        });
+    
+        map.data.addListener('mouseover', function(e) {
+            var feature = e.feature,
+                regionName = feature.getProperty('area1');
+    
+            tooltip.css({
+                display: '',
+                left: e.offset.x,
+                top: e.offset.y
+            }).text(regionName);
+    
+            map.data.overrideStyle(feature, {
+                fillOpacity: 0.6,
+                strokeWeight: 4,
+                strokeOpacity: 1
+            });
+        });
+    
+        map.data.addListener('mouseout', function(e) {
+            tooltip.hide().empty();
+            map.data.revertStyle();
+        });
+
+        map.data.addListener('click', function(e) {
+            var feature = e.feature;
+            
+        });
+    }
+    </script>
+</body>
+<script>
+
+function loadDoc(n){
+    var xhr = new XMLHttpRequest();
+    var url = 'http://apis.data.go.kr/1741000/DisasterMsg4/getDisasterMsg2List'; /*URL*/
+    const a = document.getElementById('area1').value;
+    const b = document.getElementById('area2').value;
+    var queryParams = '?' + encodeURIComponent('serviceKey') + '='+'MFhl5md99ux79WOoJFJx3qbzWcDKnCwd9WQsym5B0wytpagXud7PiL%2BBUJ29RjmJZClIShs0P2aNQan9EBVtnA%3D%3D'; /*Service Key*/
+    queryParams += '&' + encodeURIComponent('pageNo') + '=' + encodeURIComponent(n); /**/
+    queryParams += '&' + encodeURIComponent('numOfRows') + '=' + encodeURIComponent('50'); /**/
+    queryParams += '&' + encodeURIComponent('type') + '=' + encodeURIComponent('xml'); /**/
+    queryParams += '&' + encodeURIComponent('create_date') + '=' + encodeURIComponent('2021/06/22 00:00:00'); /**/
+    if(b!="시군구선택"){
+        queryParams += '&' + encodeURIComponent('location_name') + '=' + encodeURIComponent(b); /**/
+    }
+    else{
+        queryParams += '&' + encodeURIComponent('location_name') + '=' + encodeURIComponent(a); /**/
+    }
+    xhr.open('GET', url + queryParams);
+    xhr.onreadystatechange = function () {
+        if (this.readyState == 4) {
+            myFunction(this,n);
+        }
+    };
+
+    xhr.send('');
+}
+function myFunction(xml,n) {
+    var xmlDoc = xml.responseXML;
+    var table="<tr><th>날짜</th><th>지역</th><th>내용</th></tr>";
+    var date = xmlDoc.getElementsByTagName("create_date");
+    var loc = xmlDoc.getElementsByTagName("location_name");
+    var msg = xmlDoc.getElementsByTagName("msg");
+    for (var i = 0; i <loc.length; i++) { 
+        table += "<tr><td>"+date[i].innerHTML+"</td><td>"+
+        loc[i].innerHTML+"</td><td>"+
+        msg[i].innerHTML+"</td></tr>";
+    }
+    
+    document.getElementById("kpas").innerHTML = table;
+    document.getElementById("pageNum").innerHTML = n;
+    
+}
+
+function before(){
+    var a = document.getElementById("pageNum").innerHTML;
+    if(a>1)  {
+        a = a-1;
+        loadDoc(a);
+    }
+}
+
+function after(){
+    var a = parseInt(document.getElementById("pageNum").innerHTML);
+    a = a+1;
+    loadDoc(a);
+    
+}
+
+function find(){
+    var a = document.getElementById("search").value;
+    loadDoc(a);
+}
+
+function area(e){
+    var seoul = ["시군구선택", "서울특별시 종로구", "서울특별시 중구", "서울특별시 용산구", "서울특별시 성동구", "서울특별시 광진구", "서울특별시 동대문구", "서울특별시 중랑구", "서울특별시 성북구", "서울특별시 강북구", "서울특별시 도봉구", "서울특별시 노원구", "서울특별시 은평구", "서울특별시 서대문구", "서울특별시 마포구", "서울특별시 양천구", "서울특별시 강서구", "서울특별시 구로구", "서울특별시 금천구", "서울특별시 영등포구", "서울특별시 동작구", "서울특별시 관악구", "서울특별시 서초구", "서울특별시 강남구", "서울특별시 송파구", "서울특별시 강동구"];
+    var busan =["시군구선택", "부산광역시 중구", "부산광역시 서구", "부산광역시 동구", "부산광역시 영도구", "부산광역시 부산진구", "부산광역시 동래구", "부산광역시 남구", "부산광역시 북구", "부산광역시 해운대구", "부산광역시 사하구", "부산광역시 금정구", "부산광역시 강서구", "부산광역시 연제구", "부산광역시 수영구", "부산광역시 사상구", "부산광역시 기장군"];
+    var dg = ["시군구선택", "대구광역시 중구", "대구광역시 동구", "대구광역시 서구", "대구광역시 남구", "대구광역시 북구", "대구광역시 수성구", "대구광역시 달서구", "대구광역시 달성군"];
+    var ic = ["시군구선택", "인천광역시 중구", "인천광역시 동구", "인천광역시 미추홀구", "인천광역시 연수구", "인천광역시 부평구", "인천광역시 남동구", "인천광역시 계양구", "인천광역시 서구", "인천광역시 강화군", "인천광역시 옹진군"];
+    var kj = ["시군구선택", "광주광역시 동구", "광주광역시 서구", "광주광역시 남구", "광주광역시 북구", "광주광역시 광산구"]; 
+    var dj = ["시군구선택", "대전광역시 동구", "대전광역시 중구", "대전광역시 서구", "대전광역시 유성구", "대전광역시 대덕구"];
+    var us = ["시군구선택", "울산광역시 중구", "울산광역시 남구", "울산광역시 동구", "울산광역시 북구", "울산광역시 울주군"]; 
+    var sj = ["시군구선택", "세종시"]; 
+    var kk = ["시군구선택", "경기도 수원시", "경기도 성남시", "경기도 의정부시", "경기도 안양시", "경기도 부천시", "경기도 광명시", "경기도 평택시", "경기도 동두천시", "경기도 안산시", "경기도 고양시", "경기도 과천시", "경기도 구리시", "경기도 남양주시", "경기도 오산시", "경기도 시흥시", "경기도 군포시", "경기도 의왕시", "경기도 하남시", "경기도 용인시", "경기도 파주시", "경기도 이천시", "경기도 안성시", "경기도 김포시", "경기도 화성시", "경기도 광주시", "경기도 양주시", "경기도 포천시", "경기도 여주시", "경기도 연천군", "경기도 가평군", "경기도 양평군"]; 
+    var kw = ["시군구선택", "강원도 춘천시", "강원도 원주시", "강원도 강릉시", "강원도 동해시", "강원도 태백시", "강원도 속초시", "강원도 삼척시", "강원도 홍천군", "강원도 횡성군", "강원도 영월군", "강원도 평창군", "강원도 정선군", "강원도 철원군", "강원도 화천군", "강원도 양구군", "강원도 인제군", "강원도 고성군", "강원도 양양군"]; 
+    var cb = ["시군구선택", "충청북도 청주시", "충청북도 제천시", "충청북도 충주시", "충청북도 보은군", "충청북도 옥천군", "충청북도 영동군", "충청북도 증평군", "충청북도 진천군", "충청북도 괴산군", "충청북도 음성군", "충청북도 단양군"]; 
+    var cn = ["시군구선택", "충청남도 천안시", "충청남도 공주시", "충청남도 보령시", "충청남도 아산시", "충청남도 서산시", "충청남도 논산시", "충청남도 계룡시", "충청남도 금산군", "충청남도 부여군", "충청남도 서천군", "충청남도 청양군", "충청남도 홍성군", "충청남도 예산군", "충청남도 태안군", "충청남도 당진시"]; 
+    var jb = ["시군구선택", "전라북도 전주시", "전라북도 군산시", "전라북도 익산시", "전라북도 정읍시", "전라북도 남원시", "전라북도 김제시", "전라북도 완주군", "전라북도 진안군", "전라북도 무주군", "전라북도 장수군", "전라북도 임실군", "전라북도 순창군", "전라북도 고창군", "전라북도 부안군"]; 
+    var jn = ["시군구선택", "전라남도 목포시", "전라남도 여수시", "전라남도 순천시", "전라남도 나주시", "전라남도 광양시", "전라남도 담양군", "전라남도 곡성군", "전라남도 구례군", "전라남도 고흥군", "전라남도 보성군", "전라남도 화순군", "전라남도 장흥군", "전라남도 강진군", "전라남도 해남군", "전라남도 영암군", "전라남도 무안군", "전라남도 함평군", "전라남도 영광군", "전라남도 장성군", "전라남도 완도군", "전라남도 진도군", "전라남도 신안군"]; 
+    var kb = ["시군구선택", "경상북도 포항시", "경상북도 경주시", "경상북도 김천시", "경상북도 안동시", "경상북도 구미시", "경상북도 영주시", "경상북도 영천시", "경상북도 상주시", "경상북도 문경시", "경상북도 경산시", "경상북도 군위군", "경상북도 의성군", "경상북도 청송군", "경상북도 영양군", "경상북도 영덕군", "경상북도 청도군", "경상북도 고령군", "경상북도 성주군", "경상북도 칠곡군", "경상북도 예천군", "경상북도 봉화군", "경상북도 울진군", "경상북도 울릉군"]; 
+    var kn = ["시군구선택", "경상남도 창원시", "경상남도 진주시", "경상남도 통영시", "경상남도 사천시", "경상남도 김해시", "경상남도 밀양시", "경상남도 거제시", "경상남도 양산시", "경상남도 의령군", "경상남도 함안군", "경상남도 창녕군", "경상남도 고성군", "경상남도 남해군", "경상남도 하동군", "경상남도 산청군", "경상남도 함양군", "경상남도 거창군", "경상남도 합천군"]; 
+    var jj = ["시군구선택", "제주특별자치도 제주시", "제주특별자치도 서귀포시"]; 
+    loc = e.value;
+    var target = document.getElementById("area2")
+    target.options.length = 0;
+    if(loc == "서울특별시"){
+        for (x in seoul){
+            var opt = document.createElement("option");
+            opt.value = seoul[x];
+            opt.innerHTML = seoul[x];
+            target.appendChild(opt);
+        }
+    }
+    if(loc == "부산광역시"){
+        for (x in busan){
+            var opt = document.createElement("option");
+            opt.value = busan[x];
+            opt.innerHTML = busan[x];
+            target.appendChild(opt);
+        }
+    }
+    if(loc == "대구광역시"){
+        for (x in dg){
+            var opt = document.createElement("option");
+            opt.value = dg[x];
+            opt.innerHTML = dg[x];
+            target.appendChild(opt);
+        }
+    }
+    if(loc == "인천광역시"){
+        for (x in ic){
+            var opt = document.createElement("option");
+            opt.value = ic[x];
+            opt.innerHTML = ic[x];
+            target.appendChild(opt);
+        }
+    }
+    if(loc == "광주광역시"){
+        for (x in kj){
+            var opt = document.createElement("option");
+            opt.value = kj[x];
+            opt.innerHTML = kj[x];
+            target.appendChild(opt);
+        }
+    }
+    if(loc == "대전광역시"){
+        for (x in dj){
+            var opt = document.createElement("option");
+            opt.value = dj[x];
+            opt.innerHTML = dj[x];
+            target.appendChild(opt);
+        }
+    }
+    if(loc == "울산광역시"){
+        for (x in us){
+            var opt = document.createElement("option");
+            opt.value = us[x];
+            opt.innerHTML = us[x];
+            target.appendChild(opt);
+        }
+    }
+    if(loc == "세종특별자치시"){
+        for (x in sj){
+            var opt = document.createElement("option");
+            opt.value = sj[x];
+            opt.innerHTML = sj[x];
+            target.appendChild(opt);
+        }
+    }
+    if(loc == "경기도"){
+        for (x in kk){
+            var opt = document.createElement("option");
+            opt.value = kk[x];
+            opt.innerHTML = kk[x];
+            target.appendChild(opt);
+        }
+    }
+    if(loc == "강원도"){
+        for (x in kw){
+            var opt = document.createElement("option");
+            opt.value = kw[x];
+            opt.innerHTML = kw[x];
+            target.appendChild(opt);
+        }
+    }
+    if(loc == "충청북도"){
+        for (x in cb){
+            var opt = document.createElement("option");
+            opt.value = cb[x];
+            opt.innerHTML = cb[x];
+            target.appendChild(opt);
+        }
+    }
+    if(loc == "충청남도"){
+        for (x in cn){
+            var opt = document.createElement("option");
+            opt.value = cn[x];
+            opt.innerHTML = cn[x];
+            target.appendChild(opt);
+        }
+    }
+    if(loc == "전라북도"){
+        for (x in jb){
+            var opt = document.createElement("option");
+            opt.value = jb[x];
+            opt.innerHTML = jb[x];
+            target.appendChild(opt);
+        }
+    }
+    if(loc == "전라남도"){
+        for (x in jn){
+            var opt = document.createElement("option");
+            opt.value = jn[x];
+            opt.innerHTML = jn[x];
+            target.appendChild(opt);
+        }
+    }
+    if(loc == "경상북도"){
+        for (x in kb){
+            var opt = document.createElement("option");
+            opt.value = kb[x];
+            opt.innerHTML = kb[x];
+            target.appendChild(opt);
+        }
+    }if(loc == "경상남도"){
+        for (x in kn){
+            var opt = document.createElement("option");
+            opt.value = kn[x];
+            opt.innerHTML = kn[x];
+            target.appendChild(opt);
+        }
+    }if(loc == "제주특별자치도"){
+        for (x in jj){
+            var opt = document.createElement("option");
+            opt.value = jj[x];
+            opt.innerHTML = jj[x];
+            target.appendChild(opt);
+        }
+    }
+}
+</script>
+
+</html>
